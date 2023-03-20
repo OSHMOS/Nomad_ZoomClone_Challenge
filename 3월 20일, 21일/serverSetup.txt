@@ -1,0 +1,68 @@
+npm init -y
+
+{
+  "name": "zoom",
+  "version": "1.0.0",
+  "description": "Zoom Clone using NodeJS, WebRTC and Websockets",
+  "license": "MIT",
+}
+
+npm i @babel/core @babel/cli @babel/node -D
+
+{
+  "name": "zoom",
+  "version": "1.0.0",
+  "description": "Zoom Clone using NodeJS, WebRTC and Websockets",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.3",
+    "@babel/node": "^7.20.7",
+    "nodemon": "^2.0.21"
+  }
+}
+
+nodemon.json
+
+{
+  "exec": "babel-node src/server.js"
+}
+
+babel.config.json
+
+{
+  "presets": "[@babel/preset-env]"
+}
+
+npm i @babel/preset-env -D
+
+{
+  "name": "zoom",
+  "version": "1.0.0",
+  "description": "Zoom Clone using NodeJS, WebRTC and Websockets",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.3",
+    "@babel/node": "^7.20.7",
+    "@babel/preset-env": "^7.20.2",
+    "nodemon": "^2.0.21"
+  }
+}
+
+npm i express
+
+npm i pug
+
+src/server.js
+
+import express from "express";
+
+const app = express();
+
+console.log("hello");
+
+app.listen(3000);
