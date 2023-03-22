@@ -10,11 +10,18 @@ const room = document.getElementById("room");
 
 room.hidden = true; // 처음에는 방 안에서 할 수 있는 것들 안보이게!
 
+function addMessage(message){
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
+}
+
 function showRoom(){ // 방에 들어가면 방 내용이 보이게
   welcome.hidden = true;
   room.hidden = false;
   const h3 = room.querySelector("h3");
-  h3.innerText = `Room${roomName}` // 저장된 방 이름을 pug의 요소에 전달해서 띄움!
+  h3.innerText = `Room ${roomName}` // 저장된 방 이름을 pug의 요소에 전달해서 띄움!
   const msgForm = room.querySelector("#msg");
   const nameForm = room.querySelector("#name");
   msgForm.addEventListener("submit", handleRoomSubmit);
@@ -38,3 +45,11 @@ function handleRoomSubmit(event){
 // 서버는 back-end에서 function을 호출하지만 function은 front-end에서 실행됨!!
 
 form.addEventListener("submit", handleRoomSubmit);
+
+socket.on("welcome", (user) => {
+  addMessage(`${user} arrived!`);
+})
+
+socket.on("bye", (left) => {
+  addMessage(`${left} left..`);
+})

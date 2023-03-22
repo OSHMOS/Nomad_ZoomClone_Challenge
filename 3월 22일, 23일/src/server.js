@@ -31,6 +31,9 @@ wsServer.on("connection", socket => {
         done();
         socket.to(roomName).emit("welcome", socket.nickname) // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
     });
+    socket.on("disconnection", () => { // 클라이언트가 서버와 연결이 끊어지기 전에 마지막 굿바이 메시지를 보낼 수 있다!
+        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+    })
 })
 
 httpServer.listen(3000, handleListen); // 서버는 ws, http 프로토콜 모두 이해할 수 있게 된다!
