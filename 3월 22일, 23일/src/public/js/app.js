@@ -10,6 +10,8 @@ const room = document.getElementById("room");
 
 room.hidden = true; // 처음에는 방 안에서 할 수 있는 것들 안보이게!
 
+let roomName;
+
 function addMessage(message){
   const ul = room.querySelector("ul");
   const li = document.createElement("li");
@@ -42,6 +44,27 @@ function handleRoomSubmit(event){
     input.value = "";
 }
 
+function handleMessageSubmit(event){
+  event.preventDefault();
+  const input = room.querySelector("#msg input");
+  const value = input.value;
+  socket.emit("new_message", input.value, roomName, () => {
+    addMessage(`You: ${value}`);
+  }); // 백엔드로 new_message 이벤트를 날림, (input.value과 방 이름도 같이 보냄!), 마지막 요소는 백엔드에서 시작시킬 수 있는 함수!
+  input.value = "";
+}
+
+function handleNicknameSubmit(event){
+  event.preventDefault();
+  const input= room.querySelector("#name input");
+  const value = input.value;
+  socket.emit("nickname", input.value, roomName, () => {
+    addMessage(`${value}: joined!`);
+  }); // 백엔드로 new_message 이벤트를 날림, (input.value과 방 이름도 같이 보냄!), 마지막 요소는 백엔드에서 시작시킬 수 있는 함수!
+  input.value = "";
+
+}
+
 // 서버는 back-end에서 function을 호출하지만 function은 front-end에서 실행됨!!
 
 form.addEventListener("submit", handleRoomSubmit);
@@ -53,3 +76,5 @@ socket.on("welcome", (user) => {
 socket.on("bye", (left) => {
   addMessage(`${left} left..`);
 })
+
+socket.on("new_message", addMessage); //addMessage만 써도 알아서 msg를 매개변수로 넣는다!

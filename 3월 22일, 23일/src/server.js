@@ -23,7 +23,7 @@ wsServer.on("connection", socket => {
     socket["nickname"] = "Anonymous";
     socket.onAny((event) => { // 미들웨어같은 존재! 어느 이벤트에서든지 console.log를 할 수 있다.
         console.log(`Socket Event:${event}`)
-    })
+    });
     socket.on("enter_room", (roomName, done) => {
         // console.log(socket.rooms); // 현재 들어가져 있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
         socket.join(roomName);
@@ -31,9 +31,14 @@ wsServer.on("connection", socket => {
         done();
         socket.to(roomName).emit("welcome", socket.nickname) // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
     });
-    socket.on("disconnection", () => { // 클라이언트가 서버와 연결이 끊어지기 전에 마지막 굿바이 메시지를 보낼 수 있다!
+    socket.on("disconnecting", () => { // 클라이언트가 서버와 연결이 끊어지기 전에 마지막 굿바이 메시지를 보낼 수 있다!
         socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
-    })
+    });
+    socket.on("new_message", (msg, room, done) => {
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+        done(); // done은 프론트엔드에서 코드를 실행할 것!! (백엔드에서 작업)
+    });
+    socket.on("nickname", nickname => socket["nickname"] = nickname);
 })
 
 httpServer.listen(3000, handleListen); // 서버는 ws, http 프로토콜 모두 이해할 수 있게 된다!
