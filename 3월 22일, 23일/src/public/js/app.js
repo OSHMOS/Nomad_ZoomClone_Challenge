@@ -1,48 +1,29 @@
 // app.js
 
-const messageList = document.querySelector('ul');
-const nickForm = document.querySelector('#nick')
-const messageForm = document.querySelector('#message');
+const socket = io(); // io function은 알아서 socket.io를 실행하고 있는 서버를 찾을 것이다!
 
-const socket = new WebSocket(`ws://${window.location.host}`); // 이제 서버로 접속 가능! - 여기 socket을 이용해서 frontend에서 backend로 메세지 전송 가능!
-// 여기 socket은 서버로의 연결
+// 방을 만들것!! (socket IO에는 이미 방기능이 있다!)
 
-socket.addEventListener("open", ()=>{ // open되면 동작
-  console.log("Connected to Server ✅");
-})
+const welcome = document.getElementById("welcome");
+const form = welcome.querySelector("form");
 
-socket.addEventListener("message", message => {
-  const li = document.createElement('li');
-  li.innerText = message.data;
-  messageList.append(li);
-});
-
-socket.addEventListener("close", () => {
-  console.log("Disconnected to Server ❌");
-});
-
-// makeMessage : JSON을 String 형태로 바꿔주는 함수
-// 사용하는 클라이언트가 GO일 수도 있고, JAVA일 수도 있기 때문에 Javascript Object 형태로 보내면 안되고, String 형태로 보내서 모든 언어를 대비할 수 있어야 한다!
-// 우리가 사용하는 API인 websocket은 브라우저의 API이기 때문이다!!
-// 백엔드에서는 다양한 프로그래밍 언어를 사용할 수 있기 때문에 API는 어떠한 판단도 하면 안된다!
-function makeMessage(type, payload){
-  const msg = {type, payload};
-  return JSON.stringify(msg);
+function backendDone(msg) { // Front-end에서 작성된 코드는 back-end가 실행시킬 것이다 (백엔드 작업이 다 끝나면 call됨!!)
+    console.log(`The backend says: `, msg);
 }
 
-function handleSubmit(event){
-  event.preventDefault();
-  const input = messageForm.querySelector('input');
-  socket.send(makeMessage('new_message', input.value));
-  input.value = '';
+function handleRoomSubmit(event){
+    event.preventDefault();
+    const input = form.querySelector("input");
+    // argument 보내기 가능 (socketIO는 Object 전달가능)
+    // 첫 번째는 이벤트명(아무거나 상관없음), 두 번째는 front-end에서 전송하는 object(보내고 싶은 payload), 세 번째는 서버에서 호출하는 function
+    socket.emit( // emit의 마지막 요소가 function이면 가능
+        "enter_room",
+        {payload: input.value},
+        backendDone // 백엔드에서 끝났다는 사실을 알리기 위해 function을 넣고 싶다면 맨 마지막에 넣자!
+    ); // 1. socketIO를 이용하면 모든 것이 메세지일 필요가 없다! / 2. client는 어떠한 이벤트든 모두 emit 가능 / 아무거나 전송할 수 있다(text가 아니어도 되고 여러개 전송 가능!)
+    input.value = "";
 }
 
-function handleNickSubmit(event){
-  event.preventDefault();
-  const input = nickForm.querySelector('input');
-  socket.send(makeMessage('nickname', input.value));
-  input.value = '';
-}
+// 서버는 back-end에서 function을 호출하지만 function은 front-end에서 실행됨!!
 
-messageForm.addEventListener('submit', handleSubmit);
-nickForm.addEventListener('submit', handleNickSubmit);
+form.addEventListener("submit", handleRoomSubmit);

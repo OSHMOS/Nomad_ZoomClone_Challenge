@@ -13,13 +13,10 @@ html(lang="en")
         header
             h1 Noom
         main
-            //- 닉네임 설정
-            form#nick
-                input(type="text", placeholder="choose a nickname", required)
-                button Save
-            //- 메시지 리스트 : 앞으로 채워갈 것
-            ul 
-            form#message
-                input(type="text", placeholder="write a msg", required)
-                button Send 
+            div#welcome
+                form
+                    input(type="text", placeholder="room name", required)
+                    button Enter Room  
+        //- 프론트엔드에 웹소켓 설치
+        script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
