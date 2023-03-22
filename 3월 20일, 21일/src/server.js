@@ -1,7 +1,6 @@
 import http from "http";
 import WebSocket from "ws"; // npm i ws
 import express from "express";
-import { SocketAddress } from "net";
 
 const app = express();
 
@@ -27,11 +26,22 @@ const sockets = []; // 누군가 우리 채팅방에 접속하면 connection을 
 // 익명함수로 바꾸기
 wss.on("connection", socket => { // 여기의 socket이라는 매개변수는 새로운 브라우저를 뜻함!! (wss는 전체 서버, socket은 하나의 연결이라고 생각!!)
   sockets.push(socket);
+  socket["nickname"] = "Anonymous"; // 익명 소켓인 경우 처리 - 맨 처음 닉네임은 Anonymous
   console.log("Connected to Browser ✅");
   socket.on("close", () => console.log("Disconnected to Server ❌")); // 서버를 끄면 동작
-  socket.on("message", message => {
-      const utf8message = message.toString("utf8"); // 버퍼 형태로 전달되기 때문에 toString 메서드를 이용해서 utf8로 변환 필요!
-      sockets.forEach(aSocket => aSocket.send(utf8message)); // 연결된 모든 소켓에 해당 메시지 전달!!
+  socket.on("message", msg => {
+    const message = JSON.parse(msg);
+    // new_message일 때 모든 브라우저에 payload를 전송!
+    // if / else if로 해도 잘 돌아간다!
+    // 받아온 String 형태의 메시지(바로 출력하면 Buffer로 뜨지만..!)를 parse로 파싱한 후 구분해서 출력
+    switch(message.type){
+        case "new_message":
+            sockets.forEach((aSocket) => aSocket.send(`${socket.nickname}: ${message.payload}`));
+        case "nickname":
+            socket["nickname"] = message.payload; // socket은 기본적으로 객체라 새로운 아이템 추가 가능! : 닉네임을 socket 프로퍼티에 저장중!
+    }
+      // const utf8message = message.toString("utf8"); // 버퍼 형태로 전달되기 때문에 toString 메서드를 이용해서 utf8로 변환 필요!
+      // sockets.forEach(aSocket => aSocket.send(utf8message)); // 연결된 모든 소켓에 메시지를 전달!!
       // socket.send(utf8message);
   }); // 프론트엔드로부터 메시지가 오면 콘솔에 출력
 }) // socket을 callback으로 받는다! webSocket은 서버와 브라우저 사이의 연결!!!
