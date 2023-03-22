@@ -20,11 +20,16 @@ const wsServer = SocketIO(httpServer); // localhost:3000/socket.io/socket.io.js�
 
 // websocket에 비해 개선점 : 1. 어떤 이벤트든지 전달 가능 2. JS Object를 보낼 수 있음
 wsServer.on("connection", socket => {
+    socket["nickname"] = "Anonymous";
+    socket.onAny((event) => { // 미들웨어같은 존재! 어느 이벤트에서든지 console.log를 할 수 있다.
+        console.log(`Socket Event:${event}`)
+    })
     socket.on("enter_room", (roomName, done) => {
-        console.log(roomName);
-        setTimeout(()=>{
-            done("hello from the backend"); // 여기 있는 done 함수는 여기서 실행하지 않는다 - 사용자로부터 함수를 받아서 사용하면 보안문제가 생길 수 있기 때문에
-        }, 15000);
+        // console.log(socket.rooms); // 현재 들어가져 있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
+        socket.join(roomName);
+        // console.log(socket.rooms); // 앞은 id, 뒤는 현재 들어가져 있는 방
+        done();
+        socket.to(roomName).emit("welcome", socket.nickname) // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
     });
 })
 
