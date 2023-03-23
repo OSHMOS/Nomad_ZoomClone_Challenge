@@ -1,6 +1,8 @@
 import http from "http";
 import express from "express";
-import SocketIO from "socket.io";
+// npm i @socket.io/admin-ui
+import { instrument } from "@socket.io/admin-ui";
+import { Server } from "socket.io";
 
 const app = express();
 
@@ -14,7 +16,17 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`)
 // app.listen(3000, handleListen);
 
 const httpServer = http.createServer(app); // app은 requestlistener 경로 - express application으로부터 서버 생성
-const wsServer = SocketIO(httpServer); // localhost:3000/socket.io/socket.io.js로 연결 가능 (socketIO는 websocket의 부가기능이 아니다!!)
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ["https://admin.socket.io"], // 이 URL에서 localhost:3000에 액세스할 것이기 때문에! - 온라인에서 Admin UI를 실제로 테스트할 수 있는 데모 사용을 위한 환경설정!
+    credentials: true
+  }
+}); // localhost:3000/socket.io/socket.io.js로 연결 가능 (socketIO는 websocket의 부가기능이 아니다!!)
+
+instrument(wsServer, {
+  auth: false, // 실제 비밀번호를 쓰도록 바꿀 수 있음!
+  mode: "development",
+});
 
 function publicRooms(){
     const {
