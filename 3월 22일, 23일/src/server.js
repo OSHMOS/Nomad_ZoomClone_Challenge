@@ -36,6 +36,10 @@ function publicRooms(){
     return publicRooms;
 }
 
+function countRoom(roomName){ // 방에 사람 몇 명이 있는지 계산하는 함수 (set의 size를 이용)
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size; // roomName을 찾을 수도 있지만 못 찾을 수도 있기 때문에 ?를 붙여준다.
+}
+
 // websocket에 비해 개선점 : 1. 어떤 이벤트든지 전달 가능 2. JS Object를 보낼 수 있음
 wsServer.on("connection", socket => {
     socket["nickname"] = "Anonymous";
@@ -47,11 +51,11 @@ wsServer.on("connection", socket => {
         socket.join(roomName);
         // console.log(socket.rooms); // 앞은 id, 뒤는 현재 들어가져 있는 방
         done();
-        socket.to(roomName).emit("welcome", socket.nickname); // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName)); // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
         wsServer.sockets.emit("room_change", publicRooms()); // roomchange 이벤트와 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
     });
     socket.on("disconnecting", () => { // 클라이언트가 서버와 연결이 끊어지기 전에 마지막 굿바이 메시지를 보낼 수 있다!
-        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)); // 방 안에 있는 모든 사람에게 보내기 위해 forEach 사용! 나가면 사람 수가 바뀌므로 사람 수 count! 
     });
     socket.on('disconnect', () => {
         wsServer.sockets.emit("room_change", publicRooms()); // 클라이언트가 종료메시지를 모두에게 보내고 room이 변경되었다고 모두에게 알림!

@@ -64,11 +64,15 @@ function handleNicknameSubmit(event){
 
 form.addEventListener("submit", handleRoomSubmit);
 
-socket.on("welcome", (user) => {
+socket.on("welcome", (user, newCount) => {
+  const h3 = document.querySelector("h3"); // 지금은 showRoom 함수에서 copy&paste 했지만, title을 새로고침해주는 함수를 만들어줘도 좋다!
+  h3.innerText = `Room ${roomName} (${newCount})` // 지정된 방 이름을 pug의 요소에 전달해서 띄움!
   addMessage(`${user} arrived!`);
 })
 
-socket.on("bye", (left) => {
+socket.on("bye", (left, newCount) => {
+  const h3 = document.querySelector("h3");
+  h3.innerText = `Room ${roomName} ({${newCount})`
   addMessage(`${left} left..`);
 })
 
