@@ -16,6 +16,26 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`)
 const httpServer = http.createServer(app); // app은 requestlistener 경로 - express application으로부터 서버 생성
 const wsServer = SocketIO(httpServer); // localhost:3000/socket.io/socket.io.js로 연결 가능 (socketIO는 websocket의 부가기능이 아니다!!)
 
+function publicRooms(){
+    const {
+      sockets: {
+        adapter: {
+          sids, rooms
+        }
+      }
+    } = wsServer; // wsServer에서 sids와 rooms 가져오기
+  
+    // public room list 만들기
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+      if (sids.get(key) === undefined){
+        publicRooms.push(key);
+      }
+    });
+    
+    return publicRooms;
+}
+
 // websocket에 비해 개선점 : 1. 어떤 이벤트든지 전달 가능 2. JS Object를 보낼 수 있음
 wsServer.on("connection", socket => {
     socket["nickname"] = "Anonymous";
@@ -28,9 +48,13 @@ wsServer.on("connection", socket => {
         // console.log(socket.rooms); // 앞은 id, 뒤는 현재 들어가져 있는 방
         done();
         socket.to(roomName).emit("welcome", socket.nickname); // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
+        wsServer.sockets.emit("room_change", publicRooms()); // roomchange 이벤트와 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
     });
     socket.on("disconnecting", () => { // 클라이언트가 서버와 연결이 끊어지기 전에 마지막 굿바이 메시지를 보낼 수 있다!
         socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+    });
+    socket.on('disconnect', () => {
+        wsServer.sockets.emit("room_change", publicRooms()); // 클라이언트가 종료메시지를 모두에게 보내고 room이 변경되었다고 모두에게 알림!
     });
     socket.on("new_message", (msg, room, done) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);

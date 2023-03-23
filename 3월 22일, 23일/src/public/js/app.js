@@ -73,3 +73,14 @@ socket.on("bye", (left) => {
 })
 
 socket.on("new_message", addMessage); //addMessage만 써도 알아서 msg를 매개변수로 넣는다!
+
+socket.on("room_change", (rooms) => {
+  const roomList = welcome.querySelector("ul"); // home.pug에 만든 ul을 가져와서
+  roomList.innerHTML = ""; // roomList의 HTML을 초기화
+
+  rooms.forEach(room => { // rooms 데이터로 받아온 자료들을 li에 하나씩 뿌려준 후 roomList에 넣어서 출력시킨다.
+    const li = document.createElement("li");
+    li.innerText = room;
+    roomList.append(li);
+  });
+}); // 이 작업은 socket.on("room_change", (msg) => console.log(msg));와 같다!
