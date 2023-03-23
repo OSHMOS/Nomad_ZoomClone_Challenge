@@ -1,8 +1,6 @@
 import http from "http";
-import WebSocket from "ws"; // npm i ws
 import express from "express";
 import SocketIO from "socket.io";
-import { doesNotMatch } from 'assert';
 
 const app = express();
 
@@ -29,7 +27,7 @@ wsServer.on("connection", socket => {
         socket.join(roomName);
         // console.log(socket.rooms); // 앞은 id, 뒤는 현재 들어가져 있는 방
         done();
-        socket.to(roomName).emit("welcome", socket.nickname) // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
+        socket.to(roomName).emit("welcome", socket.nickname); // welcome 이벤트를 roomname에 있는 모든 사람들에게 emit한 것
     });
     socket.on("disconnecting", () => { // 클라이언트가 서버와 연결이 끊어지기 전에 마지막 굿바이 메시지를 보낼 수 있다!
         socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));

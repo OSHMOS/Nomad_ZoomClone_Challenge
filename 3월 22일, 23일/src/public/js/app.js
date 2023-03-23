@@ -26,8 +26,8 @@ function showRoom(){ // 방에 들어가면 방 내용이 보이게
   h3.innerText = `Room ${roomName}` // 저장된 방 이름을 pug의 요소에 전달해서 띄움!
   const msgForm = room.querySelector("#msg");
   const nameForm = room.querySelector("#name");
-  msgForm.addEventListener("submit", handleRoomSubmit);
-  nameForm.addEventListener("submit", handleRoomSubmit);
+  msgForm.addEventListener("submit", handleMessageSubmit);
+  nameForm.addEventListener("submit", handleNicknameSubmit);
 }
 
 function handleRoomSubmit(event){
@@ -57,12 +57,7 @@ function handleMessageSubmit(event){
 function handleNicknameSubmit(event){
   event.preventDefault();
   const input= room.querySelector("#name input");
-  const value = input.value;
-  socket.emit("nickname", input.value, roomName, () => {
-    addMessage(`${value}: joined!`);
-  }); // 백엔드로 new_message 이벤트를 날림, (input.value과 방 이름도 같이 보냄!), 마지막 요소는 백엔드에서 시작시킬 수 있는 함수!
-  input.value = "";
-
+  socket.emit("nickname", input.value);
 }
 
 // 서버는 back-end에서 function을 호출하지만 function은 front-end에서 실행됨!!
