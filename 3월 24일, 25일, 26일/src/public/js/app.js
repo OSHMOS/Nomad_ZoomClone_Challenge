@@ -14,6 +14,7 @@ let muted = false; // 처음에는 음성을 받음
 let cameraOff = false; // 처음에는 영상을 받음
 
 let roomName;
+let myPeerConnection; // 누군가 getMedia 함수를 불렀을 때와 똑같이 Stream을 공유하기 위한 변수
 
 function handleMuteClick() {
   myStream.getAudioTracks().forEach(tracks => tracks.enabled = !tracks.enabled);
@@ -96,10 +97,11 @@ call.hidden = true;
 
 const welcomeForm = welcome.querySelector("form");
 
-function startMedia() {
+async function startMedia() {
   welcome.hidden = true;
   call.hidden = false;
-  getMedia();
+  await getMedia();
+  makeConnection();
 }
 
 function handleWelcomeSubmit(event) {
@@ -111,3 +113,19 @@ function handleWelcomeSubmit(event) {
 }
 
 welcomeForm.addEventListener("submit", handleWelcomeSubmit);
+
+socket.on("welcome", async () => {
+  const offer = await myPeerConnection.createOffer(); // 다른 사용자를 초대하기 위한 초대장!! (내가 누구인지를 알려주는 내용이 들어있음!)
+  myPeerConnection.setLocalDescription(offer); // myPeerConnection에 내 초대장의 위치 정보를 연결해주는 과정
+  console.log("sent the offer");
+  socket.emit("offer", offer, roomName);
+})
+
+socket.on("offer", offer => {
+  console.log(offer);
+})
+
+function makeConnection() {
+  myPeerConnection = new RTCPeerConnection(); // peerConnection을 각각의 브라우저에 생성 ~ 참조
+  myStream.getTracks().forEach(track => myPeerConnection.addTrack(track, myStream)); // 영상과 음성 트랙을 myPeerConnection에 추가해줌 -> Peer-to-Peer 연결!!
+}
