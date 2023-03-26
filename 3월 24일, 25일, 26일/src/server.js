@@ -17,4 +17,10 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`)
 
 const httpServer = http.createServer(app); // app은 requestlistener 경로 - express application으로부터 서버 생성
 const wsServer = new Server(httpServer);
+wsServer.on("connection", socket => {
+  socket.on("join_room", (roomName, done) => {
+    socket.join(roomName);
+    done();
+  })
+})
 httpServer.listen(3000, handleListen); // 서버는 ws, http 프로토콜 모두 이해할 수 있게 된다!

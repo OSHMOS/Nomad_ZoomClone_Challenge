@@ -13,6 +13,8 @@ let myStream;
 let muted = false; // 처음에는 음성을 받음
 let cameraOff = false; // 처음에는 영상을 받음
 
+let roomName;
+
 function handleMuteClick() {
   myStream.getAudioTracks().forEach(tracks => tracks.enabled = !tracks.enabled);
   if(!muted) {
@@ -87,4 +89,25 @@ async function getMedia(deviceId) {
   }
 }
 
-getMedia();
+const welcome = document.getElementById("welcome");
+const call = document.getElementById("call")
+
+call.hidden = true;
+
+const welcomeForm = welcome.querySelector("form");
+
+function startMedia() {
+  welcome.hidden = true;
+  call.hidden = false;
+  getMedia();
+}
+
+function handleWelcomeSubmit(event) {
+  event.preventDefault();
+  const input = welcomeForm.querySelector("input");
+  socket.emit("join_room", input.value, startMedia); // 서버로 input value를 보내는 과정!!
+  roomName = input.value; // 방에 참가했을 때 나중에 쓸 수 있도록 방 이름을 변수에 저장
+  input.value = "";
+}
+
+welcomeForm.addEventListener("submit", handleWelcomeSubmit);
