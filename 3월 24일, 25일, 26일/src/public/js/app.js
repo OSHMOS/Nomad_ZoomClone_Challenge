@@ -132,7 +132,16 @@ socket.on("answer", answer => {
   myPeerConnection.setRemoteDescription(answer);
 });
 
+socket.on("ice", ice => {
+  myPeerConnection.addIceCandidate(ice);
+})
+
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection(); // peerConnection을 각각의 브라우저에 생성 https://developer.mozilla.org/ko/docs/Web/API/RTCPeerConnection 참조
+  myPeerConnection.addEventListener("icecandidate", handleIce);
   myStream.getTracks().forEach(track => myPeerConnection.addTrack(track, myStream)); // 영상과 음성 트랙을 myPeerConnection에 추가해줌 -> Peer-to-Peer 연결!!
+}
+
+function handleIce(data) {
+  socket.emit("ice", data.candidate, roomName);
 }

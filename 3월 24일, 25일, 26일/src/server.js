@@ -28,6 +28,9 @@ wsServer.on("connection", socket => {
   });
   socket.on("answer", (answer, roomName) => {
     socket.to(roomName).emit("answer", answer);
+  });
+  socket.on("ice", (ice, roomName) => {
+    socket.to(roomName).emit("ice", ice);
   })
 })
 httpServer.listen(3000, handleListen); // 서버는 ws, http 프로토콜 모두 이해할 수 있게 된다!
