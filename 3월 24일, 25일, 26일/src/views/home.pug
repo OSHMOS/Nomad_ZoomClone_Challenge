@@ -1,0 +1,21 @@
+//- home.pug
+
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Noom
+        //- 덜 못생기게 만들어주는 요소
+        link(rel="stylesheet", href="https://unpkg.com/mvp.css") 
+    body 
+        header
+            h1 Noom
+        main
+            //- playsinline은 모바일 브라우저가 필요로 하는 프로퍼티
+            //- 모바일 기기로 비디오를 재생하면 비디오가 전체 화면이 되어버리는 것을 방지
+            video#myFace(autoplay, playsinline, width="400", height="400") 
+        //- 프론트엔드에 웹소켓 설치
+        script(src="/socket.io/socket.io.js")
+        script(src="/public/js/app.js")
