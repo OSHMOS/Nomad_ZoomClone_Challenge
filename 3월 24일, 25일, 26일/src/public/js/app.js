@@ -37,8 +37,15 @@ function handleCameraClick() {
   }
 }
 
+async function handleCameraChange() {
+  await getMedia(camerasSelect.value);
+}
+
 muteBtn.addEventListener("click", handleMuteClick);
 cameraBtn.addEventListener("click", handleCameraClick);
+
+// 카메라 변경 확인
+camerasSelect.addEventListener("input", handleCameraChange);
 
 async function getCameras() {
   try {
@@ -56,14 +63,25 @@ async function getCameras() {
 }
 
 // https://developer.mozilla.org/ko/docs/Web/API/MediaDevices/getUserMedia 사용 : 유저의 유저미디어 string을 받기위함
-async function getMedia() {
+async function getMedia(deviceId) {
+  const initialConstraints = { // initialConstraints는 deviceId가 없을 때 실행
+    audio: true,
+    video: {facingmode: "user"}, // 카메라가 전, 후면에 달려있을 경우 전면 카메라의 정보를 받음 (후면 : 'environment')
+  };
+  const cameraConstraints = { // cameraConstraints는 deviceId가 있을 때 실행
+    audio: true,
+    video: {deviceId: {exact: deviceId}}, // exact를 쓰면 받아온 deviceId가 아니면 출력하지 않는다.
+  };
+
   try { // 비동기라서 try - catch 문을 사용
     myStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true
     })
     myFace.srcObject = myStream;
-    await getCameras();
+    if (!deviceId) {
+      await getCameras(); // 처음 딱 1번만 실행! 우리가 맨 처음 getMedia를 할 때만 실행됨!!
+    }
   } catch (e) {
     console.log(e);
   }
