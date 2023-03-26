@@ -116,16 +116,23 @@ welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 socket.on("welcome", async () => {
   const offer = await myPeerConnection.createOffer(); // 다른 사용자를 초대하기 위한 초대장!! (내가 누구인지를 알려주는 내용이 들어있음!)
-  myPeerConnection.setLocalDescription(offer); // myPeerConnection에 내 초대장의 위치 정보를 연결해주는 과정
+  myPeerConnection.setLocalDescription(offer); // myPeerConnection에 내 초대장의 위치 정보를 연결해주는 과정 https://developer.mozilla.org/ko/docs/Web/API/RTCPeerConnection/setLocalDescription 참조
   console.log("sent the offer");
   socket.emit("offer", offer, roomName);
-})
+});
 
-socket.on("offer", offer => {
-  console.log(offer);
-})
+socket.on("offer", async (offer) => {
+  myPeerConnection.setRemoteDescription(offer); // 다른 브라우저의 위치를 myPeerConnection에 연결해 주는 과정
+  const answer = await myPeerConnection.createAnswer();
+  myPeerConnection.setLocalDescription(answer); // 현재 브라우저에서 생성한 answer를 현재 브라우저의 myPeerConnection의 LocalDescription으로 등록!!
+  socket.emit('answer', answer, roomName);
+});
+
+socket.on("answer", answer => {
+  myPeerConnection.setRemoteDescription(answer);
+});
 
 function makeConnection() {
-  myPeerConnection = new RTCPeerConnection(); // peerConnection을 각각의 브라우저에 생성 ~ 참조
+  myPeerConnection = new RTCPeerConnection(); // peerConnection을 각각의 브라우저에 생성 https://developer.mozilla.org/ko/docs/Web/API/RTCPeerConnection 참조
   myStream.getTracks().forEach(track => myPeerConnection.addTrack(track, myStream)); // 영상과 음성 트랙을 myPeerConnection에 추가해줌 -> Peer-to-Peer 연결!!
 }
